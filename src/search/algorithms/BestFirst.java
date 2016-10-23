@@ -6,50 +6,43 @@
 package search.algorithms;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Stack;
-import static java.lang.Thread.sleep;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import search.Action;
 import search.Node;
 import search.SearchAlgorithm;
 import search.State;
-import problems.maze.MazeProblem;
 
 /**
  *
- * @author Rosa Tarraga
+ * @author Rosa Tárraga
  */
-public class UniformCost extends SearchAlgorithm {
+public class BestFirst extends SearchAlgorithm {
 
-    public UniformCost() {
+    public BestFirst() {
 
         actionSequence = new ArrayList<Action>();
     }
 
     @Override
     public void search() {
-
-        int i = 0;
         Queue<State> closed = new LinkedList<State>();
-        PriorityQueue<Node> opened = new PriorityQueue<Node>();
+        ArrayList<Node> opened = new ArrayList<Node>();
         ArrayList<Node> successors = new ArrayList<Node>();
-        boolean goal = false;
         Node actual;
-
+        int i = 0;
+        boolean goal = false;
         System.out.println("Initial node: " + problem.initialState());
         System.out.println("Final node " + problem.goalState());
 
-        opened.add(new Node(problem.initialState()));  //as frontier<-priority-queue...
+        opened.add(new Node(problem.initialState()));
 
         do {
-            actual = opened.peek(); //insert the head of the queue into actual
-            actual = opened.poll();
+
+            actual = opened.get(0);  //insert the head of the queue into actual
+            actual = opened.remove(0);
+
             if (!closed.contains(actual.getState())) {
 
                 // Found the goal state
@@ -62,31 +55,36 @@ public class UniformCost extends SearchAlgorithm {
 
                     // Obtains the successors
                     successors = getSuccessors(actual);
-
                     // Add all the succesors into the frontier or set of open nodes
                     while (!successors.isEmpty()) {
-                        
-                        // Usamos el mÃ©todo "remove" para eliminarlo de la lista a la vez que lo retornamos, asÃ­ no tenemos que hacerlo manualmente despuÃ©s
-                        opened.add(successors.get(0));
-                        successors.remove(0);
-                        
-                        
-                    }
 
-                    // Add actual state to the explored or closed set
-                    closed.add(actual.getState());
+                        if (opened.isEmpty()) {
+                            opened.add(successors.get(0));
+                            successors.remove(0);
+                        } else if (successors.get(0).getHeuristic() > opened.get(opened.size() - 1).getHeuristic()) {
+                            opened.add(opened.size(), successors.get(0));
+                            successors.remove(0);
+                        } else if (successors.get(0).getHeuristic() <= opened.get(i).getHeuristic()) {
+
+                            opened.add(i, successors.get(0));
+                            successors.remove(0);
+                        } else {
+                            i++;
+                        } 
+                    }
+                    // Usamos el mÃ©todo "remove" para eliminarlo de la lista a la vez que lo retornamos, asÃ­ no tenemos que hacerlo manualmente despuÃ©s
+//                    opened.add(successors.remove(0));
                 }
+
+                // Add actual state to the explored or closed set
+                closed.add(actual.getState());
             }
 
         } while (opened.size() > 0);
 
-        //  while (nodes.peek().getState() != problem.initialState()) {
-        //resultado.add(nodos.peek().getAction());
-        // Obtenemos la soluciÃ³n
         if (goal) {
-
-            // El coste se va acumulando cada vez que pasamos por un nodo, puedes obtenerlo directamente
-            totalCost = actual.getCost();
+            //the cost is getting acumulated every time we pass through a node
+                  totalCost = actual.getCost();
 
             // Gets the path
             while (!(actual.getState().equals(problem.initialState()))) {
@@ -99,5 +97,4 @@ public class UniformCost extends SearchAlgorithm {
         }
 
     }
-
 }
