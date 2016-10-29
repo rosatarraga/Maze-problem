@@ -35,7 +35,7 @@ public class DepthFirst extends SearchAlgorithm {
     public void search() {
 
         Queue<State> closed = new LinkedList<State>();
-        Stack<Node> opened = new Stack<Node>();
+        Stack<Node> opened = new Stack<Node>(); //stack for the opened nodes because the behaviour is LIFO
         ArrayList<Node> successors = new ArrayList<Node>();
         Node actual;
         boolean goal = false;
@@ -66,7 +66,7 @@ public class DepthFirst extends SearchAlgorithm {
                     // Add all the succesors into the frontier or set of open nodes
                     while (!successors.isEmpty()) {
 
-                        // Usamos el mÃ©todo "remove" para eliminarlo de la lista a la vez que lo retornamos, asÃ­ no tenemos que hacerlo manualmente despuÃ©s
+                       //we use the method remove to delete from the list of successors and add to the list of opened nodes
                         opened.add(successors.remove(0));
                     }
 
@@ -77,12 +77,9 @@ public class DepthFirst extends SearchAlgorithm {
 
         } while (opened.size() > 0);
 
-        //  while (nodes.peek().getState() != problem.initialState()) {
-        //resultado.add(nodos.peek().getAction());
-        // Obtenemos la soluciÃ³n
+
         if (goal) {
 
-            // El coste se va acumulando cada vez que pasamos por un nodo, puedes obtenerlo directamente
             totalCost = actual.getCost();
 
             // Gets the path
@@ -93,6 +90,7 @@ public class DepthFirst extends SearchAlgorithm {
             }
 
             Collections.reverse(actionSequence);
+            System.out.println(actionSequence);
         }
 
     }

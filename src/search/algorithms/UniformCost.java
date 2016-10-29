@@ -20,12 +20,13 @@ import search.Node;
 import search.SearchAlgorithm;
 import search.State;
 import problems.maze.MazeProblem;
+import static java.lang.Thread.sleep;
 
 /**
  *
- * @author Rosa Tarraga
+ * @author Rosa Tárraga
  */
-public class UniformCost extends SearchAlgorithm {
+public class UniformCost extends SearchAlgorithm /*implements SearchProblem*/ {
 
     public UniformCost() {
 
@@ -35,21 +36,22 @@ public class UniformCost extends SearchAlgorithm {
     @Override
     public void search() {
 
-        int i = 0;
         Queue<State> closed = new LinkedList<State>();
-        PriorityQueue<Node> opened = new PriorityQueue<Node>();
+        PriorityQueue<Node> opened = new PriorityQueue<Node>(Node.BY_COST);
         ArrayList<Node> successors = new ArrayList<Node>();
-        boolean goal = false;
         Node actual;
-
+        boolean goal = false;
         System.out.println("Initial node: " + problem.initialState());
         System.out.println("Final node " + problem.goalState());
 
-        opened.add(new Node(problem.initialState()));  //as frontier<-priority-queue...
+        opened.add(new Node(problem.initialState())); //as frontier<-new fifo-queue...initial state
 
-        do {
+        do { //while frontier!=0
+
             actual = opened.peek(); //insert the head of the queue into actual
             actual = opened.poll();
+
+            // Checks if it has been already explored
             if (!closed.contains(actual.getState())) {
 
                 // Found the goal state
@@ -65,12 +67,9 @@ public class UniformCost extends SearchAlgorithm {
 
                     // Add all the succesors into the frontier or set of open nodes
                     while (!successors.isEmpty()) {
-                        
-                        // Usamos el mÃ©todo "remove" para eliminarlo de la lista a la vez que lo retornamos, asÃ­ no tenemos que hacerlo manualmente despuÃ©s
-                        opened.add(successors.get(0));
-                        successors.remove(0);
-                        
-                        
+
+                        //we use the method remove to delete from the list of successors and add to the list of opened nodes
+                        opened.add(successors.remove(0));
                     }
 
                     // Add actual state to the explored or closed set
@@ -80,12 +79,8 @@ public class UniformCost extends SearchAlgorithm {
 
         } while (opened.size() > 0);
 
-        //  while (nodes.peek().getState() != problem.initialState()) {
-        //resultado.add(nodos.peek().getAction());
-        // Obtenemos la soluciÃ³n
         if (goal) {
 
-            // El coste se va acumulando cada vez que pasamos por un nodo, puedes obtenerlo directamente
             totalCost = actual.getCost();
 
             // Gets the path
@@ -96,8 +91,8 @@ public class UniformCost extends SearchAlgorithm {
             }
 
             Collections.reverse(actionSequence);
+            System.out.println(actionSequence);
         }
 
     }
-
 }

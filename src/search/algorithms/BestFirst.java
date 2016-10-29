@@ -8,6 +8,7 @@ package search.algorithms;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import search.Action;
 import search.Node;
@@ -28,7 +29,7 @@ public class BestFirst extends SearchAlgorithm {
     @Override
     public void search() {
         Queue<State> closed = new LinkedList<State>();
-        ArrayList<Node> opened = new ArrayList<Node>();
+        PriorityQueue<Node> opened = new PriorityQueue<Node>(Node.BY_HEURISTIC); //priority queue ordered by heuristic
         ArrayList<Node> successors = new ArrayList<Node>();
         Node actual;
         int i = 0;
@@ -37,12 +38,12 @@ public class BestFirst extends SearchAlgorithm {
         System.out.println("Final node " + problem.goalState());
 
         opened.add(new Node(problem.initialState()));
+        do { //while frontier!=0
 
-        do {
+            actual = opened.peek(); //insert the head of the queue into actual
+            actual = opened.poll();
 
-            actual = opened.get(0);  //insert the head of the queue into actual
-            actual = opened.remove(0);
-
+            // Checks if it has been already explored
             if (!closed.contains(actual.getState())) {
 
                 // Found the goal state
@@ -55,36 +56,25 @@ public class BestFirst extends SearchAlgorithm {
 
                     // Obtains the successors
                     successors = getSuccessors(actual);
+
                     // Add all the succesors into the frontier or set of open nodes
                     while (!successors.isEmpty()) {
+                        //we use the method remove to delete from the list of successors and add to the list of opened nodes
 
-                        if (opened.isEmpty()) {
-                            opened.add(successors.get(0));
-                            successors.remove(0);
-                        } else if (successors.get(0).getHeuristic() > opened.get(opened.size() - 1).getHeuristic()) {
-                            opened.add(opened.size(), successors.get(0));
-                            successors.remove(0);
-                        } else if (successors.get(0).getHeuristic() <= opened.get(i).getHeuristic()) {
-
-                            opened.add(i, successors.get(0));
-                            successors.remove(0);
-                        } else {
-                            i++;
-                        } 
+                        opened.add(successors.remove(0));
                     }
-                    // Usamos el mÃ©todo "remove" para eliminarlo de la lista a la vez que lo retornamos, asÃ­ no tenemos que hacerlo manualmente despuÃ©s
-//                    opened.add(successors.remove(0));
-                }
 
-                // Add actual state to the explored or closed set
-                closed.add(actual.getState());
+                    // Add actual state to the explored or closed set
+                    closed.add(actual.getState());
+                }
             }
 
         } while (opened.size() > 0);
 
         if (goal) {
-            //the cost is getting acumulated every time we pass through a node
-                  totalCost = actual.getCost();
+
+   
+            totalCost = actual.getCost();
 
             // Gets the path
             while (!(actual.getState().equals(problem.initialState()))) {
@@ -92,8 +82,10 @@ public class BestFirst extends SearchAlgorithm {
                 actionSequence.add(actual.getAction());
                 actual = actual.getParent();
             }
+            
 
             Collections.reverse(actionSequence);
+            System.out.println(actionSequence);
         }
 
     }
